@@ -1,0 +1,48 @@
+enum TokenType
+{
+    // single character symbols
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_BRACE,
+    RIGHT_BRACE,
+    LEFT_SQUARE,
+    RIGHT_SQUARE,
+    PLUS,
+    MINUS,
+    PERIOD,
+    COMMA,
+    SEMICOLON,
+    SLASH,
+    STAR,
+    // one or two character operators
+    BANG,
+    BANG_EQUAL,
+    EQUAL,
+    DOUBLE_EQUAL,
+    LESS,
+    LESS_EQUAL,
+    GREATER,
+    GREATER_EQUAL,
+    BOOLEAN_AND,
+    BOOLEAN_OR,
+    // literals
+    IDENTIFIER,
+    STRING,
+    NUMBER,
+    // keywords
+    ELSE,
+    FALSE,
+    FOR,
+    IF,
+    NIL,
+    PRINT,
+    RETURN,
+    SUPER,
+    THIS,
+    TRUE,
+    WHILE,
+    INT,
+    CHAR,
+    STRUCT,
+    END_OF_FILE
+};
