@@ -2,6 +2,7 @@
 #include "token.h"
 #include <string>
 #include <vector>
+#include <map>
 class Lexer
 {
 private:
@@ -11,10 +12,21 @@ private:
     int current;
     int line;
     std::vector<Token> scan_tokens();
+    std::map<std::string, TokenType> keywords;
     char fstep();
     void tokenize();
     int ended();
     void add_token(TokenType type, std::string value);
+    int is_next(char expected);
+    char lookahead();
+    char lookahead_next();
+    void process_string_literal();
+    void process_number();
+    void process_identifier();
+    int is_digit(char c);
+    int is_alpha(char c);
+    int is_alphanumeric(char c);
+    void initialize_keyword_map();
 
 public:
     Lexer(std::string source);

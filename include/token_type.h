@@ -23,6 +23,8 @@ enum TokenType
     LESS_EQUAL,
     GREATER,
     GREATER_EQUAL,
+    BITWISE_AND,
+    BITWISE_OR,
     BOOLEAN_AND,
     BOOLEAN_OR,
     // literals
@@ -34,7 +36,6 @@ enum TokenType
     FALSE,
     FOR,
     IF,
-    NIL,
     PRINT,
     RETURN,
     SUPER,
