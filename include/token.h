@@ -5,11 +5,11 @@
 
 #define MAX_TOKEN_SIZE 256
 
-typedef struct __token
+struct Token
 {
     TokenType type;
     int line;
     char lexeme[MAX_TOKEN_SIZE];
-    __token(TokenType type, int line, char *value);
+    Token(TokenType type, int line, char *value);
     std::string to_string();
-} Token;
+};

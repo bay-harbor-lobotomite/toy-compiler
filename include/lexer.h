@@ -1,5 +1,6 @@
 #pragma once
 #include "token.h"
+#include "token_type.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -11,7 +12,6 @@ private:
     int start;
     int current;
     int line;
-    std::vector<Token> scan_tokens();
     std::map<std::string, TokenType> keywords;
     char fstep();
     void tokenize();
@@ -30,4 +30,7 @@ private:
 
 public:
     Lexer(std::string source);
+    std::vector<Token> scan_tokens();
 };
+
+extern "C" int yylex();

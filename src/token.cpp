@@ -1,7 +1,7 @@
 #include "../include/token.h"
 #include <cstring>
 
-Token::__token(TokenType type, int line, char*value) {
+Token::Token(TokenType type, int line, char*value) {
     this->type = type;
     this->line = line;
     strncpy(this->lexeme, value, std::min((int)(sizeof(value) / sizeof(char)), MAX_TOKEN_SIZE));

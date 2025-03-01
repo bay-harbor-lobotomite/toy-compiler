@@ -1,4 +1,5 @@
 #include "../include/lexer.h"
+#include "../include/token.h"
 #include <iostream>
 
 Lexer::Lexer(std::string source)
@@ -18,7 +19,7 @@ std::vector<Token> Lexer::scan_tokens()
         tokenize();
     }
 
-    tokens.push_back(Token(TokenType::END_OF_FILE, this->line, ""));
+    tokens.push_back(Token(TokenType::END_OF_FILE, this->line, std::string("").data()));
     return tokens;
 }
 
@@ -28,22 +29,22 @@ void Lexer::tokenize()
     switch (c)
     {
     case '(':
-        add_token(TokenType::LEFT_PAREN, "(");
+        add_token(TokenType::L_PAREN, "(");
         break;
     case ')':
-        add_token(TokenType::RIGHT_PAREN, ")");
+        add_token(TokenType::R_PAREN, ")");
         break;
     case '{':
-        add_token(TokenType::LEFT_BRACE, "{");
+        add_token(TokenType::L_BRACE, "{");
         break;
     case '}':
-        add_token(TokenType::RIGHT_BRACE, "}");
+        add_token(TokenType::R_BRACE, "}");
         break;
     case '[':
-        add_token(TokenType::LEFT_SQUARE, "[");
+        add_token(TokenType::L_SQUARE, "[");
         break;
     case ']':
-        add_token(TokenType::RIGHT_SQUARE, "]");
+        add_token(TokenType::R_SQUARE, "]");
         break;
     case '.':
         add_token(TokenType::PERIOD, ".");
@@ -64,22 +65,22 @@ void Lexer::tokenize()
         add_token(TokenType::STAR, "*");
         break;
     case '!':
-        is_next('=') ? add_token(TokenType::BANG_EQUAL, "!=") : add_token(TokenType::BANG, "!");
+        is_next('=') ? add_token(TokenType::B_EQ, "!=") : add_token(TokenType::BANG, "!");
         break;
     case '=':
-        is_next('=') ? add_token(TokenType::DOUBLE_EQUAL, "==") : add_token(TokenType::EQUAL, "=");
+        is_next('=') ? add_token(TokenType::EQ_EQ, "==") : add_token(TokenType::EQ, "=");
         break;
     case '>':
-        is_next('=') ? add_token(TokenType::GREATER_EQUAL, ">=") : add_token(TokenType::GREATER, ">");
+        is_next('=') ? add_token(TokenType::GR_EQ, ">=") : add_token(TokenType::GR, ">");
         break;
     case '<':
-        is_next('=') ? add_token(TokenType::LESS_EQUAL, "<=") : add_token(TokenType::LESS, "<");
+        is_next('=') ? add_token(TokenType::LE_EQ, "<=") : add_token(TokenType::LE, "<");
         break;
     case '&':
-        is_next('&') ? add_token(TokenType::BOOLEAN_AND, "&&") : add_token(TokenType::BITWISE_AND, "&");
+        is_next('&') ? add_token(TokenType::BOOL_AND, "&&") : add_token(TokenType::BIT_AND, "&");
         break;
     case '|':
-        is_next('|') ? add_token(TokenType::BOOLEAN_OR, "||") : add_token(TokenType::BITWISE_OR, "|");
+        is_next('|') ? add_token(TokenType::BOOL_OR, "||") : add_token(TokenType::BIT_OR, "|");
         break;
     case '/':
         if (is_next('/'))
@@ -130,7 +131,7 @@ char Lexer::fstep()
 }
 int Lexer::ended()
 {
-    return current >= source.size() ? 1 : 0;
+    return current >= (int)source.size() ? 1 : 0;
 }
 int Lexer::is_next(char expected)
 {
@@ -148,7 +149,7 @@ char Lexer::lookahead()
 }
 char Lexer::lookahead_next()
 {
-    if (current + 1 >= source.length())
+    if (current + 1 >= (int)source.length())
         return '\0';
     return source[current + 1];
 }
