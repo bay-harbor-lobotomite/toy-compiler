@@ -1,1 +1,3 @@
-obj/
+tooled/obj/
+handcrafted/obj/
+tooled/my_compiler
