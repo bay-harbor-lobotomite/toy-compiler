@@ -9,6 +9,7 @@ IS			(u|U|l|L)*
 #include <stdio.h>
 #include "y.tab.h"
 
+
 void count();
 void comment();
 int check_type();
@@ -126,10 +127,10 @@ void comment()
 	char c, c1;
 
 loop:
-	while ((c = input()) != '*' && c != 0)
+	while ((c = yyinput()) != '*' && c != 0)
 		putchar(c);
 
-	if ((c1 = input()) != '/' && c != 0)
+	if ((c1 = yyinput()) != '/' && c != 0)
 	{
 		unput(c1);
 		goto loop;

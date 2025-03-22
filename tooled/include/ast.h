@@ -1,5 +1,4 @@
 #pragma once
-#include <cstddef>
 #include <string>
 #include <vector>
 #include <cstdarg>
@@ -10,12 +9,12 @@ class AstNode
 {
 public:
     long long id;
-    size_t colno;
-    size_t line;
+    unsigned int colno;
+    unsigned int line;
     AstNode();
-    AstNode(size_t line, size_t colno);
+    AstNode(unsigned int line, unsigned int colno);
 
-    virtual void add_children(size_t count, ...);
+    virtual void add_children(unsigned int count, ...);
 };
 
 class Term : public AstNode
@@ -25,7 +24,7 @@ public:
     std::string val;
     // to string conversions done in constructor for ease of use and readability
     Term(const char *name, const char *val);
-    Term(const char *name, const char *val, size_t line, size_t colno);
+    Term(const char *name, const char *val, unsigned int line, unsigned int colno);
 };
 
 class NonTerm : public AstNode
@@ -35,7 +34,7 @@ public:
     std::vector<AstNode *> children;
 
     NonTerm(const char *name);
-    void add_children(size_t count, ...);
+    void add_children(unsigned int count, ...);
 };
 
 // some basics
@@ -57,7 +56,7 @@ class Cnst : public Term
 {   
     public:
     //todo: semantic check - CHANGE CONSTRUCTOR
-    Cnst(const char* name, const char*val, size_t line, size_t colno): Term(name, val, line, colno) {};
+    Cnst(const char* name, const char*val, unsigned int line, unsigned int colno): Term(name, val, line, colno) {};
     union cnst_val val;
 };
 

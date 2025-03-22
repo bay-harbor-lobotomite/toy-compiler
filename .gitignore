@@ -2,3 +2,6 @@ tooled/obj/
 handcrafted/obj/
 tooled/my_compiler
 .vscode/
+tooled/src/y.tab.h
+tooled/src/lex.yy.c
+tooled/src/y.tab.c
