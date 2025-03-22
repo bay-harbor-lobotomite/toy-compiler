@@ -17,25 +17,29 @@
 	Idfr* identifier;
 	AssignExpr* assignment_expression;
 	UnaryExpr* unary_expression;
-	MultExpr* multiplicative_expression;
-	AddExpr* additive_expression;
-	ShiftExpr* shift_expression;
-	RelExpr* relational_expression;
-	EqExpr* equality_expression;
-	AndExpr* and_expression;
-	XorExpr* exclusive_or_expression;
-	OrExpr* inclusive_or_expression;
-	LogAndExpr* logical_and_expression;
-	LogOrExpr* logical_or_expression;
+	BinaryExpr* binary_expr;
+	// uncomment these if you need specific type for any rule, right now they all become BinaryExpr with name
+	// MultExpr* multiplicative_expression;
+	// AddExpr* additive_expression;
+	// ShiftExpr* shift_expression;
+	// RelExpr* relational_expression;
+	// EqExpr* equality_expression;
+	// AndExpr* and_expression;
+	// XorExpr* exclusive_or_expression;
+	// OrExpr* inclusive_or_expression;
+	// LogAndExpr* logical_and_expression;
+	// LogOrExpr* logical_or_expression;
 	CondExpr* conditional_expression;
+	CastExpr* cast_expression;
+	ConstExpr* constant_expression;
 	Expr* expression;
 	ArgExprList* argument_expression_list;
 }
 
 %token <terminal> '.' 
-%token <node> '(' ')' '[' ']' ',' '+' '-' '!' '&' '*' '~' '/' '%'
-%token <node> '<' '>' '^' '|' ':' '?' ';' '{' '}'
-%token <node> '='
+%token <terminal> '(' ')' '[' ']' ',' '+' '-' '!' '&' '*' '~' '/' '%'
+%token <terminal> '<' '>' '^' '|' ':' '?' ';' '{' '}'
+%token <terminal> '='
 
 %token <identifier> IDENTIFIER 
 %token <constant> CONSTANT 
@@ -43,10 +47,10 @@
 %token <terminal> SIZEOF
 //incrementally making things terminal when i need shit from them lol
 %token <terminal> INC_OP DEC_OP PTR_OP 
-%token <node> LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
-%token <node> AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
-%token <node> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
-%token <node> XOR_ASSIGN OR_ASSIGN TYPE_NAME
+%token <terminal> LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
+%token <terminal> AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
+%token <terminal> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
+%token <terminal> XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
@@ -55,23 +59,26 @@
 %token <node> CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
 %type <expression> expression
-%type <expression> assignment_expression
-%type <expression> logical_and_expression
-%type <expression> logical_or_expression 
+%type <expression> primary_expression
+%type <expression> postfix_expression
 %type <expression> unary_expression
 %type <expression> cast_expression
+%type <expression> binary_expression
+%type <expression> logical_and_expression
+%type <expression> logical_or_expression 
 %type <expression> relational_expression
 %type <expression> shift_expression 
 %type <expression> inclusive_or_expression 
 %type <expression> exclusive_or_expression
 %type <expression> additive_expression
-%type <argument_expression_list> argument_expression_list
 %type <expression> multiplicative_expression
-%type <expression> and_expression
 %type <expression> equality_expression  
+%type <expression> and_expression
 %type <expression> conditional_expression
-%type <expression> postfix_expression
-%type <expression> primary_expression
+%type <expression> assignment_expression
+%type <expression> constant_expression
+%type <argument_expression_list> argument_expression_list
+%type <terminal> assignment_operator unary_operator
 
 %start translation_unit
 %%
@@ -100,117 +107,118 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression 
-	| INC_OP unary_expression
-	| DEC_OP unary_expression
-	| unary_operator cast_expression
-	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
+	: postfix_expression {$$ = $1;}
+	| INC_OP unary_expression {$$ = gen_unary_expr($1, $2);}
+	| DEC_OP unary_expression {$$ = gen_unary_expr($1, $2);}
+	| unary_operator cast_expression // implement when implemented cast expr {$$ = gen_unary_cast($1, $2);}
+	| SIZEOF unary_expression {$$ = gen_unary_expr($1, $2);}
+	| SIZEOF '(' type_name ')' // {$$ = gen_unary_expr($1, $2);}
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: '&' {$$ = $1;}
+	| '*' {$$ = $1;}
+	| '+' {$$ = $1;}
+	| '-' {$$ = $1;}
+	| '~' {$$ = $1;}
+	| '!' {$$ = $1;}
 	;
 
 cast_expression
-	: unary_expression
-	| '(' type_name ')' cast_expression
+	: unary_expression {$$ = $1;}
+	| '(' type_name ')' cast_expression //do when you do type_name {$$ = gen_cast_expr($1, $3);}
 	;
 
 multiplicative_expression
-	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	: cast_expression {$$ = $1;}
+	| multiplicative_expression '*' cast_expression {$$ = gen_binary_expr($1, $2, $3, "multiplicative_expression");}
+	| multiplicative_expression '/' cast_expression {$$ = gen_binary_expr($1, $2, $3, "multiplicative_expression");}
+	| multiplicative_expression '%' cast_expression {$$ = gen_binary_expr($1, $2, $3, "multiplicative_expression");}
 	;
 
 additive_expression
-	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	: multiplicative_expression {$$ = $1;}
+	| additive_expression '+' multiplicative_expression {$$ = gen_binary_expr($1, $2, $3, "additive_expression");}
+	| additive_expression '-' multiplicative_expression {$$ = gen_binary_expr($1, $2, $3, "additive_expression");}
 	;
 
 shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression
-	| shift_expression RIGHT_OP additive_expression
+	: additive_expression {$$ = $1;}
+	| shift_expression LEFT_OP additive_expression {$$ = gen_binary_expr($1, $2, $3, "shift_expression");}
+	| shift_expression RIGHT_OP additive_expression {$$ = gen_binary_expr($1, $2, $3, "shift_expression");}
 	;
 
 relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
-	| relational_expression LE_OP shift_expression
-	| relational_expression GE_OP shift_expression
+	: shift_expression {$$ = $1;}
+	| relational_expression '<' shift_expression {$$ = gen_binary_expr($1, $2, $3, "relative_expression");}
+	| relational_expression '>' shift_expression {$$ = gen_binary_expr($1, $2, $3, "relative_expression");}
+	| relational_expression LE_OP shift_expression {$$ = gen_binary_expr($1, $2, $3, "relative_expression");}
+	| relational_expression GE_OP shift_expression {$$ = gen_binary_expr($1, $2, $3, "relative_expression");}
 	;
 
 equality_expression
-	: relational_expression
-	| equality_expression EQ_OP relational_expression
-	| equality_expression NE_OP relational_expression
+	: relational_expression {$$ = $1;}
+	| equality_expression EQ_OP relational_expression {$$ = gen_binary_expr($1, $2, $3, "equality_expression");}
+	| equality_expression NE_OP relational_expression {$$ = gen_binary_expr($1, $2, $3, "equality_expression");}
 	;
 
 and_expression
-	: equality_expression
-	| and_expression '&' equality_expression
+	: equality_expression {$$ = $1;}
+	| and_expression '&' equality_expression {$$ = gen_binary_expr($1, $2, $3, "and_expression");}
 	;
 
 exclusive_or_expression
-	: and_expression
-	| exclusive_or_expression '^' and_expression
+	: and_expression {$$ = $1;}
+	| exclusive_or_expression '^' and_expression {$$ = gen_binary_expr($1, $2, $3, "xor_expression");}
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
+	: exclusive_or_expression {$$ = $1;}
+	| inclusive_or_expression '|' exclusive_or_expression {$$ = gen_binary_expr($1, $2, $3, "or_expression");}
 	;
 
 logical_and_expression
-	: inclusive_or_expression
-	| logical_and_expression AND_OP inclusive_or_expression
+	: inclusive_or_expression {$$ = $1;}
+	| logical_and_expression AND_OP inclusive_or_expression {$$ = gen_binary_expr($1, $2, $3, "logical_and_expression");}
 	;
 
 logical_or_expression
-	: logical_and_expression
-	| logical_or_expression OR_OP logical_and_expression
+	: logical_and_expression {$$ = $1;}
+	| logical_or_expression OR_OP logical_and_expression {$$ = gen_binary_expr($1, $2, $3, "logical_or_expression");}
 	;
 
 conditional_expression
-	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
+	: logical_or_expression {$$ = $1;}
+	| logical_or_expression '?' expression ':' conditional_expression {$$ = gen_cond_expr($1, $3, $5, "?:");}
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression {$$ = $1;}
+	| unary_expression assignment_operator assignment_expression {$$ = gen_assign_expr($1, $2, $3);}
 	;
 
 assignment_operator
-	: '='
-	| MUL_ASSIGN
-	| DIV_ASSIGN
-	| MOD_ASSIGN
-	| ADD_ASSIGN
-	| SUB_ASSIGN
-	| LEFT_ASSIGN
-	| RIGHT_ASSIGN
-	| AND_ASSIGN
-	| XOR_ASSIGN
-	| OR_ASSIGN
+	: '=' {$$ = $1;}
+	| MUL_ASSIGN {$$ = $1;}
+	| DIV_ASSIGN {$$ = $1;}
+	| MOD_ASSIGN {$$ = $1;}
+	| ADD_ASSIGN {$$ = $1;}
+	| SUB_ASSIGN {$$ = $1;}
+	| LEFT_ASSIGN {$$ = $1;}
+	| RIGHT_ASSIGN {$$ = $1;}
+	| AND_ASSIGN {$$ = $1;}
+	| XOR_ASSIGN {$$ = $1;}
+	| OR_ASSIGN {$$ = $1;}
 	;
 
 expression
-	: assignment_expression
-	| expression ',' assignment_expression
+	: assignment_expression {$$ = $1;}
+	| expression ',' assignment_expression {$$ = gen_toplevel_expr($1, $3);}
 	;
 
+//stupid def but makes sense
 constant_expression
-	: conditional_expression
+	: conditional_expression {$$ = $1;}
 	;
 
 declaration

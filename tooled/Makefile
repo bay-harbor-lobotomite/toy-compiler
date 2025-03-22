@@ -29,10 +29,10 @@ $(OBJ_DIR)/lexer.o: lexspec
 
 compiler: $(OBJS)
 	$(LD) -Ur $(OBJS) -o $(OBJ_DIR)/final.o
-	$(CXX) $(OBJ_DIR)/final.o -o my_compiler
+	$(CXX) $(OBJ_DIR)/final.o -o compiler
 
 clean:
-	rm -f $(OBJ_DIR)/*.o my_compiler $(SRC_DIR)/y.tab.c $(SRC_DIR)/y.tab.h $(SRC_DIR)/lex.yy.c
+	rm -f $(OBJ_DIR)/*.o compiler $(SRC_DIR)/y.tab.c $(SRC_DIR)/y.tab.h $(SRC_DIR)/lex.yy.c
 
 .PHONY: grammar
 grammar: $(GRAMMAR)
