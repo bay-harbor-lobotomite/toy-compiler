@@ -6,65 +6,97 @@
 	//type declarations
 %}
 
+%require "3.2"
 
 %union{
 	AstNode * node;
-	// Term * terminal;
-	// int value;
-	// Cnst *constant;
-	// StrLit *string_literal;
-	// AssignExpr* assignment_expression;
-	// UnaryExpr* unary_expression;
-	// MultExpr* multiplicative_expression;
-	// AddExpr* additive_expression;
-	// ShiftExpr* shift_expression;
-	// RelExpr* relational_expression;
-	// EqExpr* equality_expression;
-	// AndExpr* and_expression;
-	// XorExpr* exclusive_or_expression;
-	// OrExpr* inclusive_or_expression;
-	// LogAndExpr* logical_and_expression;
-	// LogOrExpr* logical_or_expression;
-	// CondExpr* conditional_expression;
-	// Expr* expression;
+	Term * terminal;
+	int value;
+	Cnst *constant;
+	StrLit *string_literal;
+	Idfr* identifier;
+	AssignExpr* assignment_expression;
+	UnaryExpr* unary_expression;
+	MultExpr* multiplicative_expression;
+	AddExpr* additive_expression;
+	ShiftExpr* shift_expression;
+	RelExpr* relational_expression;
+	EqExpr* equality_expression;
+	AndExpr* and_expression;
+	XorExpr* exclusive_or_expression;
+	OrExpr* inclusive_or_expression;
+	LogAndExpr* logical_and_expression;
+	LogOrExpr* logical_or_expression;
+	CondExpr* conditional_expression;
+	Expr* expression;
+	ArgExprList* argument_expression_list;
 }
 
-%token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
-%token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
-%token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
-%token SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
-%token XOR_ASSIGN OR_ASSIGN TYPE_NAME
+%token <terminal> '.' 
+%token <node> '(' ')' '[' ']' ',' '+' '-' '!' '&' '*' '~' '/' '%'
+%token <node> '<' '>' '^' '|' ':' '?' ';' '{' '}'
+%token <node> '='
+
+%token <identifier> IDENTIFIER 
+%token <constant> CONSTANT 
+%token <string_literal> STRING_LITERAL 
+%token <terminal> SIZEOF
+//incrementally making things terminal when i need shit from them lol
+%token <terminal> INC_OP DEC_OP PTR_OP 
+%token <node> LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
+%token <node> AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
+%token <node> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
+%token <node> XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
 %token STRUCT UNION ENUM ELLIPSIS
 
-%token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+%token <node> CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
+
+%type <expression> expression
+%type <expression> assignment_expression
+%type <expression> logical_and_expression
+%type <expression> logical_or_expression 
+%type <expression> unary_expression
+%type <expression> cast_expression
+%type <expression> relational_expression
+%type <expression> shift_expression 
+%type <expression> inclusive_or_expression 
+%type <expression> exclusive_or_expression
+%type <expression> additive_expression
+%type <argument_expression_list> argument_expression_list
+%type <expression> multiplicative_expression
+%type <expression> and_expression
+%type <expression> equality_expression  
+%type <expression> conditional_expression
+%type <expression> postfix_expression
+%type <expression> primary_expression
 
 %start translation_unit
 %%
 
 primary_expression
-	: IDENTIFIER
-	| CONSTANT
-	| STRING_LITERAL
-	| '(' expression ')'
+	: IDENTIFIER {$$ = gen_prexpr_idfr($1);}
+	| CONSTANT {$$ = gen_prexpr_cnst($1);}
+	| STRING_LITERAL {$$ = gen_prexpr_strlit($1);}
+	| '(' expression ')' {$$ = $2;}
 	;
 
 postfix_expression
-	: primary_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' IDENTIFIER
-	| postfix_expression PTR_OP IDENTIFIER
-	| postfix_expression INC_OP
-	| postfix_expression DEC_OP
+	: primary_expression {$$ = $1;}
+	| postfix_expression '[' expression ']' {$$ = gen_postfix_arr($1, $3);}
+	| postfix_expression '(' ')' {$$ = gen_postfix_voidfun($1);}
+	| postfix_expression '(' argument_expression_list ')'  {$$ = gen_postfix_fun($1, $3);}
+	| postfix_expression '.' IDENTIFIER {$$ = gen_postfix_struni($1, $2, $3);}
+	| postfix_expression PTR_OP IDENTIFIER {$$ = gen_postfix_struni($1, $2, $3);}
+	| postfix_expression INC_OP {$$ = gen_postfix_idop($1, $2);}
+	| postfix_expression DEC_OP {$$ = gen_postfix_idop($1, $2);}
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	: assignment_expression {$$ = gen_argexprlist(NULL, $1);}
+	| argument_expression_list ',' assignment_expression {$$ = gen_argexprlist($1, $3);}
 	;
 
 unary_expression

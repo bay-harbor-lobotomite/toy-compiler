@@ -1,7 +1,7 @@
 CXX=g++
 CFLAGS=-Wall -g
 BISON=bison
-BISONFLAGS=-o
+BISONFLAGS=--warnings=none -o
 LEX=flex
 LD=ld
 
