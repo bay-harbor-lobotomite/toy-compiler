@@ -1,23 +1,22 @@
 #pragma once
+#include <cstdarg>
 #include <string>
 #include <vector>
-#include <cstdarg>
 // Essentially modelling these as structs
 // Class for AST node
 
-class AstNode
+struct AstNode
 {
-public:
     long long id;
     unsigned int colno;
     unsigned int line;
     AstNode();
     AstNode(unsigned int line, unsigned int colno);
 
-    virtual void add_children(unsigned int count, ...);
+    void add_children(unsigned int count, ...);
 };
 
-class Term : public AstNode
+struct Term : public AstNode
 {
 public:
     std::string name;
@@ -27,7 +26,7 @@ public:
     Term(const char *name, const char *val, unsigned int line, unsigned int colno);
 };
 
-class NonTerm : public AstNode
+struct NonTerm : public AstNode
 {
 public:
     std::string name;
@@ -38,7 +37,7 @@ public:
 };
 
 // some basics
-class Idfr : public Term
+struct Idfr : public Term
 {
 };
 
@@ -52,7 +51,7 @@ union cnst_val{
     char c;
     unsigned char uc;
 };
-class Cnst : public Term
+struct Cnst : public Term
 {   
     public:
     //todo: semantic check - CHANGE CONSTRUCTOR
@@ -60,7 +59,7 @@ class Cnst : public Term
     union cnst_val val;
 };
 
-class StrLit : public Term
+struct StrLit : public Term
 {
     public:
     StrLit(const char *name, const char* val): Term(name, val) {};
@@ -68,21 +67,21 @@ class StrLit : public Term
 
 enum PrExprType
 {
-    EXPRESSION,
-    IDENTIFIER,
-    CONSTANT,
-    STRING_LITERAL
+    EXPRESSION_G,
+    IDENTIFIER_G,
+    CONSTANT_G,
+    STRING_LITERAL_G
 };
 
 
 // expressions and their corresponding grammar helpers
-class Expr : public NonTerm
+struct Expr : public NonTerm
 {
 public:
     Expr() : NonTerm("") {};
 };
 
-class PrExpr : public Expr
+struct PrExpr : public Expr
 {
 public:
     PrExprType expr_type;
@@ -93,48 +92,53 @@ public:
         StrLit *string_lit;
         Expr *expr;
     } val;
-    PrExpr() : expr_type(EXPRESSION) {}
+    PrExpr() : expr_type(EXPRESSION_G) {}
 };
 
-class UnaryExpr : public Expr {
+struct UnaryExpr : public Expr {
+    public:
+    Expr* oprnd;
+    Term* op;
+    UnaryExpr() : oprnd(nullptr), op(nullptr) {}
+};
+
+UnaryExpr* build_unary_expr();
+
+struct AddExpr: public Expr {
 
 };
 
-class AddExpr: public Expr {
+struct MultExpr: public Expr {
 
 };
-
-class MultExpr: public Expr {
-
-};
-class AndExpr: public Expr {
+struct AndExpr: public Expr {
 
 };
-class OrExpr: public Expr {
+struct OrExpr: public Expr {
 
 };
-class XorExpr: public Expr {
+struct XorExpr: public Expr {
 
 };
-class LogAndExpr: public Expr {
+struct LogAndExpr: public Expr {
 
 };
-class LogOrExpr: public Expr {
+struct LogOrExpr: public Expr {
 
 };
-class RelExpr: public Expr {
+struct RelExpr: public Expr {
 
 };
-class EqExpr: public Expr {
+struct EqExpr: public Expr {
 
 };
-class ShiftExpr: public Expr {
+struct ShiftExpr: public Expr {
 
 };
-class CondExpr: public Expr {
+struct CondExpr: public Expr {
 
 };
-class AssignExpr : public Expr {
+struct AssignExpr : public Expr {
 
 };
 

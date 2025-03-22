@@ -1,8 +1,33 @@
 %{
+	#include <ast.h>
 	int yylex();
 	void yyerror(const char* s);
+	extern AstNode* root;
+	//type declarations
 %}
 
+
+%union{
+	AstNode * node;
+	// Term * terminal;
+	// int value;
+	// Cnst *constant;
+	// StrLit *string_literal;
+	// AssignExpr* assignment_expression;
+	// UnaryExpr* unary_expression;
+	// MultExpr* multiplicative_expression;
+	// AddExpr* additive_expression;
+	// ShiftExpr* shift_expression;
+	// RelExpr* relational_expression;
+	// EqExpr* equality_expression;
+	// AndExpr* and_expression;
+	// XorExpr* exclusive_or_expression;
+	// OrExpr* inclusive_or_expression;
+	// LogAndExpr* logical_and_expression;
+	// LogOrExpr* logical_or_expression;
+	// CondExpr* conditional_expression;
+	// Expr* expression;
+}
 
 %token IDENTIFIER CONSTANT STRING_LITERAL SIZEOF
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -43,7 +68,7 @@ argument_expression_list
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression 
 	| INC_OP unary_expression
 	| DEC_OP unary_expression
 	| unary_operator cast_expression
@@ -422,6 +447,7 @@ function_definition
 
 %%
 #include <stdio.h>
+#include <ast.h>
 
 extern char yytext[];
 extern int column;
@@ -431,4 +457,8 @@ void yyerror(const char *s)
 {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
+}
+
+int main(){
+	return yyparse();
 }

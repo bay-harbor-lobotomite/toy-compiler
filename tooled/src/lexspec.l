@@ -7,6 +7,7 @@ IS			(u|U|l|L)*
 
 %{
 #include <stdio.h>
+#include <ast.h>
 #include "y.tab.h"
 
 
@@ -115,6 +116,8 @@ L?\"(\\.|[^\\"])*\"	{ count(); return(STRING_LITERAL); }
 .			{ /* ignore bad characters */ }
 
 %%
+
+#include <ast.h>
 
 int yywrap()
 {

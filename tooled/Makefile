@@ -3,28 +3,33 @@ CFLAGS=-Wall -g
 BISON=bison
 BISONFLAGS=-o
 LEX=flex
+LD=ld
 
 SRC_DIR=src
 OBJ_DIR=bin
 INC_DIR=include
 GRAMMAR=$(SRC_DIR)/grammar.y
 LEXSPEC=$(SRC_DIR)/lexspec.l
+INCFLAGS = $(addprefix -I, $(INC_DIR))
+LDFLAgs=-lfl
 
-OBJS=$(OBJ_DIR)/parser.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/lexer.o
+OBJS=$(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/lexer.o
 
 all: compiler
 
 $(OBJ_DIR)/ast.o: $(SRC_DIR)/ast.cpp
-	$(CXX) -c $(SRC_DIR)/ast.cpp -o $(OBJ_DIR)/ast.o
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/ast.cpp -o $(OBJ_DIR)/ast.o
 
 $(OBJ_DIR)/parser.o: grammar
-	$(CXX) -c $(SRC_DIR)/y.tab.c -o $(OBJ_DIR)/parser.o
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/y.tab.c -o $(OBJ_DIR)/parser.o
 
 $(OBJ_DIR)/lexer.o: lexspec
-	$(CXX) -c $(SRC_DIR)/lex.yy.c -o $(OBJ_DIR)/lexer.o $(CFLAGS)
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/lex.yy.c -o $(OBJ_DIR)/lexer.o $(CFLAGS)
+
 
 compiler: $(OBJS)
-	$(CXX) $(OBJS) -o my_compiler -ll
+	$(LD) -Ur $(OBJS) -o $(OBJ_DIR)/final.o
+	$(CXX) $(OBJ_DIR)/final.o -o my_compiler
 
 clean:
 	rm -f $(OBJ_DIR)/*.o my_compiler $(SRC_DIR)/y.tab.c $(SRC_DIR)/y.tab.h $(SRC_DIR)/lex.yy.c
