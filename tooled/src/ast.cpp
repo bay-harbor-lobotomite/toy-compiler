@@ -44,24 +44,36 @@ PrExpr* gen_prexpr_idfr(Idfr* i) {
     auto p = new PrExpr();
     p->name = "primary_expression";
     p->expr_type = IDENTIFIER_G;
-    p->line = i->line;
-    p->colno = i->colno;
+    //temp guard
+    if(i)
+    {
+        p->line = i->line;
+        p->colno = i->colno;
+    }
     return p;
 }
 PrExpr* gen_prexpr_cnst(Cnst* c) {
     auto p = new PrExpr();
     p->name = "primary_expression";
     p->expr_type = CONSTANT_G;
-    p->line = c->line;
-    p->colno = c->colno;
+    //temp guard
+    if(c)
+    {
+        p->line = c->line;
+        p->colno = c->colno;
+    }
     return p;
 }
 PrExpr* gen_prexpr_strlit(StrLit* s) {
     auto p = new PrExpr();
     p->name = "primary_expression";
     p->expr_type = STRING_LITERAL_G;
-    p->line = s->line;
-    p->colno = s->colno;
+    //temp guard
+    if(s)
+    {
+        p->line = s->line;
+        p->colno = s->colno;
+    }
     return p;
 }
 

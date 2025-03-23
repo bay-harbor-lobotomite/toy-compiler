@@ -1,4 +1,4 @@
-CXX=g++
+CXX=g++ -g
 CFLAGS=-Wall -g
 BISON=bison
 BISONFLAGS=--warnings=none -o
@@ -13,12 +13,15 @@ LEXSPEC=$(SRC_DIR)/lexspec.l
 INCFLAGS = $(addprefix -I, $(INC_DIR))
 LDFLAgs=-lfl
 
-OBJS=$(OBJ_DIR)/ast.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/lexer.o
+OBJS=$(OBJ_DIR)/ast.o $(OBJ_DIR)/symtable.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/lexer.o
 
 all: compiler
 
 $(OBJ_DIR)/ast.o: $(SRC_DIR)/ast.cpp
 	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/ast.cpp -o $(OBJ_DIR)/ast.o
+
+$(OBJ_DIR)/symtable.o: $(SRC_DIR)/symtable.cpp
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/symtable.cpp -o $(OBJ_DIR)/symtable.o
 
 $(OBJ_DIR)/parser.o: grammar
 	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/y.tab.c -o $(OBJ_DIR)/parser.o
