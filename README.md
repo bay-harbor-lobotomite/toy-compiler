@@ -7,3 +7,4 @@ a toy compiler for (hopefully) a subset of the C programming language/C-like lan
 - [Yacc grammar for ANSI C 1985 that I extended](https://www.lysator.liu.se/c/ANSI-C-grammar-y.html)
 - [Similar lex spec](https://www.lysator.liu.se/c/ANSI-C-grammar-l.html)
 - [The Dragon book for reference](https://www.amazon.in/Compilers-2e-Aho/dp/9332518661)
+- Borrowing ideas and some code (hehe) for type handling, AST construction paradigm and dot file generation from [these guys](https://github.com/sidjay10/CS335-C-Compiler)

@@ -11,10 +11,13 @@ public:
     long long id;
     unsigned int colno;
     unsigned int line;
+    //for dot generation
+    bool is_printed = true;
     AstNode();
     AstNode(unsigned int line, unsigned int colno);
 
     void add_children(unsigned int count, ...);
+    virtual void to_dot() = 0;
 };
 
 class Term : public AstNode
@@ -25,6 +28,7 @@ public:
     // to string conversions done in constructor for ease of use and readability
     Term(const char *name, const char *val);
     Term(const char *name, const char *val, unsigned int line, unsigned int colno);
+    void to_dot() override;
 };
 
 class NonTerm : public AstNode
@@ -35,6 +39,7 @@ public:
 
     NonTerm(const char *name);
     void add_children(unsigned int count, ...);
+    void to_dot() override;
 };
 
 // some basics
@@ -229,4 +234,18 @@ public:
 TopLevelExpr *gen_toplevel_expr(Expr *e1, Expr *e2);
 class ConstExpr : public Expr
 {
+};
+
+class TypeSpecifier: public Term {
+
+};
+class TypeQualifier: public Term {
+
+};
+class StorageClassSpecifier {
+
+};
+class SpecifierQualifierList {
+    std::vector<TypeSpecifier*> specifiers;
+    std::vector<TypeQualifier*> qualifiers;
 };

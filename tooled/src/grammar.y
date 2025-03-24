@@ -34,6 +34,10 @@
 	ConstExpr* constant_expression;
 	Expr* expression;
 	ArgExprList* argument_expression_list;
+	TypeSpecifier* type_specifier;
+	TypeQualifier* type_qualifier;
+	SpecifierQualifierList* specifier_qualifier_list;
+	StorageClassSpecifier* storage_class_specifier;
 }
 
 %token <terminal> '.' 
@@ -52,8 +56,9 @@
 %token <terminal> SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN
 %token <terminal> XOR_ASSIGN OR_ASSIGN TYPE_NAME
 
-%token TYPEDEF EXTERN STATIC AUTO REGISTER
-%token CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE CONST VOLATILE VOID
+%token <storage_class_specifier> TYPEDEF EXTERN STATIC AUTO REGISTER
+%token <type_specifier> CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
+%token <type_qualifier> CONST VOLATILE
 %token STRUCT UNION ENUM ELLIPSIS
 
 %token <node> CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
@@ -79,6 +84,10 @@
 %type <expression> constant_expression
 %type <argument_expression_list> argument_expression_list
 %type <terminal> assignment_operator unary_operator
+%type <type_specifier> type_specifier
+%type <storage_class_specifier> storage_class_specifier
+%type <type_qualifier> type_qualifier
+%type <specifier_qualifier_list> specifier_qualifier_list
 
 %start translation_unit
 %%
@@ -246,26 +255,26 @@ init_declarator
 	;
 
 storage_class_specifier
-	: TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
+	: TYPEDEF {$$ = $1;}
+	| EXTERN {$$ = $1;}
+	| STATIC {$$ = $1;}
+	| AUTO {$$ = $1;}
+	| REGISTER {$$ = $1;}
 	;
 
 type_specifier
-	: VOID
-	| CHAR
-	| SHORT
-	| INT
-	| LONG
-	| FLOAT
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
+	: VOID {$$ = $1;}
+	| CHAR {$$ = $1;}
+	| SHORT {$$ = $1;}
+	| INT {$$ = $1;}
+	| LONG {$$ = $1;}
+	| FLOAT {$$ = $1;}
+	| DOUBLE {$$ = $1;}
+	| SIGNED {$$ = $1;}
+	| UNSIGNED {$$ = $1;}
 	| struct_or_union_specifier
 	| enum_specifier
-	| TYPE_NAME
+	| TYPE_NAME 
 	;
 
 struct_or_union_specifier
@@ -323,8 +332,8 @@ enumerator
 	;
 
 type_qualifier
-	: CONST
-	| VOLATILE
+	: CONST {$$ = $1;}
+	| VOLATILE {$$ = $1;}
 	;
 
 declarator
@@ -400,7 +409,7 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
+	: assignment_expression 
 	| '{' initializer_list '}'
 	| '{' initializer_list ',' '}'
 	;
@@ -497,8 +506,4 @@ void yyerror(const char *s)
 {
 	fflush(stdout);
 	printf("\n%*s\n%*s\n", column, "^", column, s);
-}
-
-int main(){
-	return yyparse();
 }

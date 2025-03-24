@@ -1,10 +1,13 @@
 #include "../include/ast.h"
+#include <sstream>
 
 static long long global_id = 0;
 
 long long increment_id() {
     return global_id++;
 }
+
+extern void file_writer(std::string);
 
 AstNode::AstNode(unsigned int line, unsigned int colno) : id(increment_id()), line(line), colno(colno) {};
 AstNode::AstNode(): id(increment_id()) {};
@@ -30,6 +33,32 @@ void NonTerm::add_children(unsigned int count, ...) {
         children.push_back(va_arg(list, AstNode*));
     } 
     va_end(list); 
+}
+
+//hehe stolen
+void Term::to_dot() {
+	if(is_printed){
+		is_printed = 0;
+		std::stringstream ss;
+		ss << "\t" << id << " [label=\"" << name << " : " << val << "\"];\n";
+		file_writer(ss.str());
+	}
+}
+
+void NonTerm::to_dot() {
+	if(is_printed){
+		is_printed = 0;
+		std::stringstream ss;
+		ss << "\t" << id << " [label=\"" << name << "\"];\n";
+		for (auto it = children.begin(); it != children.end(); it++) {
+			ss << "\t" << id << " -> " << (*it)->id << ";\n";
+		}
+		file_writer(ss.str());
+
+		for(auto it = children.begin(); it != children.end(); it++){
+			(*it)->to_dot();
+		}
+	}
 }
 
 ArgExprList* gen_argexprlist(ArgExprList*l, Expr* arg){
