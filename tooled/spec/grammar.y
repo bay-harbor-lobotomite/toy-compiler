@@ -1,5 +1,8 @@
 %{
+	#include <expr.h>
+	#include <decl.h>
 	#include <ast.h>
+	#include <stdio.h>
 	int yylex();
 	void yyerror(const char* s);
 	extern AstNode* root;
@@ -34,10 +37,22 @@
 	ConstExpr* constant_expression;
 	Expr* expression;
 	ArgExprList* argument_expression_list;
-	TypeSpecifier* type_specifier;
-	TypeQualifier* type_qualifier;
-	SpecifierQualifierList* specifier_qualifier_list;
-	StorageClassSpecifier* storage_class_specifier;
+	TypeSpec* type_specifier;
+	TypeQual* type_qualifier;
+	SpecQualList* specifier_qualifier_list;
+	StorageClassSpec* storage_class_specifier;
+	DeclSpecs* declaration_specifiers;
+	InitDeclList* init_declarator_list;
+	InitDecl* init_declarator;
+	//masti
+	Decln* declaration;
+	Decl* declarator;
+	Initializer* initializer;
+	TypeQualList* type_qualifier_list;
+	Ptr* pointer;
+	DirDecl* direct_declarator;
+	IdfrList* identifier_list;
+	InitializerList* initializer_list;
 }
 
 %token <terminal> '.' 
@@ -88,6 +103,17 @@
 %type <storage_class_specifier> storage_class_specifier
 %type <type_qualifier> type_qualifier
 %type <specifier_qualifier_list> specifier_qualifier_list
+%type <declaration_specifiers> declaration_specifiers
+%type <init_declarator_list> init_declarator_list
+%type <init_declarator> init_declarator
+%type <declaration> declaration
+%type <declarator> declarator
+%type <initializer> initializer
+%type <type_qualifier_list> type_qualifier_list
+%type <pointer> pointer
+%type <direct_declarator> direct_declarator
+%type <identifier_list> identifier_list
+%type <initializer_list> initializer_list
 
 %start translation_unit
 %%
@@ -231,27 +257,27 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+	: declaration_specifiers ';' {$$ = gen_decln($1, NULL);}
+	| declaration_specifiers init_declarator_list ';' {$$ = gen_decln($1, $2);}
 	;
 
 declaration_specifiers
-	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
-	| type_specifier
-	| type_specifier declaration_specifiers
-	| type_qualifier
-	| type_qualifier declaration_specifiers
+	: storage_class_specifier {$$ = gen_declspecs(NULL, NULL, NULL, $1);}
+	| storage_class_specifier declaration_specifiers {$$ = gen_declspecs($2, NULL, NULL, $1);}
+	| type_specifier {$$ = gen_declspecs(NULL, $1, NULL, NULL);}
+	| type_specifier declaration_specifiers {$$ = gen_declspecs($2, $1, NULL, NULL);}
+	| type_qualifier {$$ = gen_declspecs(NULL, NULL, $1, NULL);}
+	| type_qualifier declaration_specifiers {$$ = gen_declspecs($2, NULL, $1, NULL);}
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator {$$ = gen_initdecl_list(NULL, $1);}
+	| init_declarator_list ',' init_declarator {$$ = gen_initdecl_list($1, $3);}
 	;
 
 init_declarator
-	: declarator
-	| declarator '=' initializer
+	: declarator {$$ = gen_initdecl($1, NULL);}
+	| declarator '=' initializer {$$ = gen_initdecl($1, $3);}
 	;
 
 storage_class_specifier
@@ -298,10 +324,10 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
-	| type_qualifier
+	: type_specifier specifier_qualifier_list {$$ = gen_specqual_list($2, $1, NULL);}
+	| type_specifier {$$ = gen_specqual_list(NULL, $1, NULL);}
+	| type_qualifier specifier_qualifier_list {$$ = gen_specqual_list($2, NULL, $1);}
+	| type_qualifier {$$ = gen_specqual_list(NULL, NULL, $1);}
 	;
 
 struct_declarator_list
@@ -337,8 +363,8 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
+	: pointer direct_declarator {$$ = gen_decl($2, $1);}
+	| direct_declarator {$$ = gen_decl($1, NULL);}
 	;
 
 direct_declarator
@@ -346,28 +372,29 @@ direct_declarator
 	| '(' declarator ')'
 	| direct_declarator '[' constant_expression ']'
 	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
+	| direct_declarator '(' parameter_list ')'
 	| direct_declarator '(' identifier_list ')'
 	| direct_declarator '(' ')'
 	;
 
 pointer
-	: '*'
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*' type_qualifier_list pointer
+	: '*' {$$ = gen_ptr(NULL, NULL);}
+	| '*' type_qualifier_list {$$ = gen_ptr($2, NULL);}
+	| '*' pointer {$$ = gen_ptr(NULL, $2);}
+	| '*' type_qualifier_list pointer {$$ = gen_ptr($2, $3);}
 	;
 
 type_qualifier_list
-	: type_qualifier
-	| type_qualifier_list type_qualifier
+	: type_qualifier {$$ = gen_typequal_list(NULL, $1);}
+	| type_qualifier_list type_qualifier {$$ = gen_typequal_list($1, $2);}
 	;
 
 
-parameter_type_list
-	: parameter_list
-	| parameter_list ',' ELLIPSIS
-	;
+//yeah i cant do ts
+// parameter_type_list
+// 	: parameter_list
+// 	| parameter_list ',' ELLIPSIS
+// 	;
 
 parameter_list
 	: parameter_declaration
@@ -376,14 +403,14 @@ parameter_list
 
 parameter_declaration
 	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator
+	| declaration_specifiers abstract_declarator 
 	| declaration_specifiers
 	;
 
 identifier_list
-	: IDENTIFIER
-	| identifier_list ',' IDENTIFIER
-	;
+	: IDENTIFIER {$$ = gen_idfrlist(NULL, $1);}
+	| identifier_list ',' IDENTIFIER {$$ = gen_idfrlist($1, $3);}
+	; 
 
 type_name
 	: specifier_qualifier_list
@@ -403,20 +430,20 @@ direct_abstract_declarator
 	| direct_abstract_declarator '[' ']'
 	| direct_abstract_declarator '[' constant_expression ']'
 	| '(' ')'
-	| '(' parameter_type_list ')'
+	| '(' parameter_list ')'
 	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
+	| direct_abstract_declarator '(' parameter_list ')'
 	;
 
 initializer
-	: assignment_expression 
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
+	: assignment_expression {$$ = gen_initializer($1, NULL);}
+	| '{' initializer_list '}' {$$ = gen_initializer(NULL, $2);}
+	| '{' initializer_list ',' '}' {$$ = gen_initializer(NULL, $2);}
 	;
 
 initializer_list
-	: initializer
-	| initializer_list ',' initializer
+	: initializer {$$ = gen_initializerlist(NULL, $1);}
+	| initializer_list ',' initializer {$$ = gen_initializerlist($1, $3);}
 	;
 
 statement
@@ -495,8 +522,9 @@ function_definition
 	;
 
 %%
-#include <stdio.h>
+#include <expr.h>
 #include <ast.h>
+#include <stdio.h>
 
 extern char yytext[];
 extern int column;

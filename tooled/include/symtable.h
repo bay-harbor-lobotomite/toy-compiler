@@ -1,5 +1,6 @@
 #pragma once
 #include <ast.h>
+#include <expr.h>
 #include <vector>
 #include <cstddef>
 #include <sstream>
@@ -12,9 +13,9 @@
 #define WORD_SIZE 4
 
 class Type;
-class TypeSpec;
+class TypeDesc;
 
-extern std::vector<TypeSpec*> type_list;
+extern std::vector<TypeDesc*> type_list;
 
 enum Primitive {
     T_ERR = -1,
@@ -35,7 +36,7 @@ enum Primitive {
 unsigned int get_primitive_size(Primitive type);
 std::string get_primitive_name(Primitive name);
 void init_primitives();
-int define_new_type(TypeSpec* ts);
+int define_new_type(TypeDesc* ts);
 
 
 //index ---> indexes into global type list
@@ -64,7 +65,7 @@ class Type {
     Type(int idx): type_index(idx) {}
 
     //helpers
-    TypeSpec* spec() const { return type_list[type_index];}
+    TypeDesc* spec() const { return type_list[type_index];}
     std::string get_name() const;
     size_t get_size() const;
     bool is_primitive() const {return type_index >= T_UCHAR && type_index <= T_VOID;}
@@ -87,7 +88,7 @@ class Type {
 
 // a type descriptor of sorts for basic primitives, defined struct/union types
 // composite types like arrays and functions are composed using these primitives
-class TypeSpec {
+class TypeDesc {
     public:
     int idx;
     size_t size;
@@ -96,7 +97,7 @@ class TypeSpec {
     bool is_struct;
     bool is_union;
     bool is_primitive;
-    TypeSpec(): is_pointer(false), is_struct(false), is_union(false), is_primitive(false) {}
+    TypeDesc(): is_pointer(false), is_struct(false), is_union(false), is_primitive(false) {}
 };
 
 class Sym {
@@ -108,7 +109,7 @@ class Sym {
     //mem stuff
     size_t offset;
     Sym() {}
-    Sym(auto name): name(name) {}
+    Sym(std::string name): name(name) {}
 };
 class SymTab {
     public:

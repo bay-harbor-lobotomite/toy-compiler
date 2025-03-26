@@ -1,6 +1,6 @@
 #include <symtable.h>
 
-std::vector<TypeSpec *> type_list;
+std::vector<TypeDesc *> type_list;
 
 std::string get_primitive_name(Primitive type)
 {
@@ -101,7 +101,7 @@ void init_primitives()
 {
     for (auto i = 0; i <= T_VOID; i++)
     {
-        auto ts = new TypeSpec();
+        auto ts = new TypeDesc();
         ts->idx = i;
         ts->is_primitive = true;
         ts->is_union = false;
@@ -112,7 +112,7 @@ void init_primitives()
         type_list.push_back(ts);
     }
 }
-int define_new_type(TypeSpec *ts)
+int define_new_type(TypeDesc *ts)
 {
     // check if type already exists
     for (auto it = type_list.begin(); it != type_list.end(); it++)
@@ -180,6 +180,7 @@ size_t Type::get_size() const
     if (is_pointer() || is_func)
         return WORD_SIZE;
     // implement struct sizes here
+    return 0;
 }
 
 bool operator==(Type &t1, Type &t2)
@@ -271,6 +272,7 @@ bool SymTab::delete_symbols() {
         delete it.second;
     }
     symbols.clear();
+    return true;
 }
 
 bool SymTabStack::incr_scope()

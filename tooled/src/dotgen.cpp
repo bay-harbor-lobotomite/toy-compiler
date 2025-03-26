@@ -5,6 +5,8 @@
 #include <fstream>
 
 #include <ast.h>
+#include <expr.h>
+#include <decl.h>
 #include "y.tab.h"
 
 extern FILE *yyin;
