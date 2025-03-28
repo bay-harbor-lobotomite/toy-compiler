@@ -4,7 +4,7 @@
 class Expr : public NonTerm
 {
 public:
-    Expr() : NonTerm("") {};
+    Expr() {};
     virtual ~Expr() {};
 };
 

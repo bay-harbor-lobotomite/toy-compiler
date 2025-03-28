@@ -47,10 +47,10 @@ int check_type();
 "signed"		{ yylval.type_specifier = gen_typespec(SIGNED, 0, 0) ;count(); return(SIGNED); }
 "sizeof"		{ count(); return(SIZEOF); }
 "static"		{ yylval.storage_class_specifier = gen_storagecl_spec(STATIC, 0, 0); count(); return(STATIC); }
-"struct"		{ count(); return(STRUCT); }
+"struct"		{ count(); yylval.terminal = new Term("STRUCT", "") ;return(STRUCT); }
 "switch"		{ count(); return(SWITCH); }
 "typedef"		{ yylval.storage_class_specifier = gen_storagecl_spec(TYPEDEF, 0, 0); count(); return(TYPEDEF); }
-"union"			{ count(); return(UNION); }
+"union"			{ count(); yylval.terminal = new Term("UNION", ""); return(UNION); }
 "unsigned"		{ yylval.type_specifier = gen_typespec(UNSIGNED, 0, 0) ; count(); return(UNSIGNED); }
 "void"			{ yylval.type_specifier = gen_typespec(VOID, 0, 0) ; count(); return(VOID); }
 "volatile"		{ yylval.type_qualifier = gen_typequal(VOLATILE, 0, 0) ; count(); return(VOLATILE); }

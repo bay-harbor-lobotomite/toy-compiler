@@ -2,7 +2,7 @@ tooled/obj/
 handcrafted/obj/
 tooled/compiler
 .vscode/
-tooled/src/y.tab.h
+tooled/include/y.tab.h
 tooled/src/lex.yy.c
 tooled/src/y.tab.c
 tooled/*dot

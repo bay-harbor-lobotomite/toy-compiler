@@ -42,8 +42,13 @@ int main(int argc, char *argv[]) {
 	root = new NonTerm("translation_unit");
 	int abc = yyparse();
 	root->to_dot();
+
+	assert(abc == 0);
 	
-    assert(abc == 0);
+    // if(abc == 0){
+	// 	std::cout << "Syntax error!" << "\n";
+	// 	exit(0);
+	// }
 	
 	ss.str("");
 	ss << "}\n";

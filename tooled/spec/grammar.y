@@ -73,6 +73,12 @@
 	LabStmt* labeled_statement;
 	ExprStmt* expression_statement;
 	FuncDef* function_definition;
+	TypeName* type_name;
+	StructDecl* struct_declarator;
+	StructDeclList* struct_declarator_list;
+	StructDecln* struct_declaration;
+	StructDeclnList* struct_declaration_list;
+	StructOrUnionSpec* struct_or_union_specifier;
 }
 
 %token <terminal> '.' 
@@ -94,7 +100,7 @@
 %token <storage_class_specifier> TYPEDEF EXTERN STATIC AUTO REGISTER
 %token <type_specifier> CHAR SHORT INT LONG SIGNED UNSIGNED FLOAT DOUBLE VOID
 %token <type_qualifier> CONST VOLATILE
-%token STRUCT UNION ENUM ELLIPSIS
+%token <terminal> STRUCT UNION ENUM ELLIPSIS
 
 %token <node> CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
@@ -152,6 +158,14 @@
 %type <statement> expression_statement
 %type <non_terminal> external_declaration
 %type <function_definition> function_definition
+%type <type_name> type_name
+%type <terminal> struct_or_union
+%type <struct_declarator> struct_declarator
+%type <struct_declarator_list> struct_declarator_list
+%type <struct_declaration> struct_declaration
+%type <struct_declaration_list> struct_declaration_list
+%type <struct_or_union_specifier> struct_or_union_specifier
+
 
 %start translation_unit
 %%
@@ -337,28 +351,28 @@ type_specifier
 	| SIGNED {$$ = $1;}
 	| UNSIGNED {$$ = $1;}
 	| struct_or_union_specifier 
-	| enum_specifier
+	| enum_specifier 
 	| TYPE_NAME 
 	;
 
 struct_or_union_specifier
-	: struct_or_union IDENTIFIER '{' struct_declaration_list '}'
-	| struct_or_union '{' struct_declaration_list '}'
-	| struct_or_union IDENTIFIER
+	: struct_or_union IDENTIFIER '{' struct_declaration_list '}' {$$ = gen_structorunion_spec($1->name.c_str(), $2, $4);}
+	| struct_or_union '{' struct_declaration_list '}' {$$ = gen_structorunion_spec($1->name.c_str(), NULL, $3);}
+	| struct_or_union IDENTIFIER {$$ = gen_structorunion_spec($1->name.c_str(), $2, NULL);}
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT {$$ = $1;}
+	| UNION {$$ = $1;}
 	;
 
 struct_declaration_list
-	: struct_declaration
-	| struct_declaration_list struct_declaration
+	: struct_declaration {$$ = gen_structdeclnlist(NULL, $1);}
+	| struct_declaration_list struct_declaration {$$ = gen_structdeclnlist($1, $2);}
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';'
+	: specifier_qualifier_list struct_declarator_list ';' {$$ = gen_structdecln($1, $2);}
 	;
 
 specifier_qualifier_list
@@ -369,14 +383,14 @@ specifier_qualifier_list
 	;
 
 struct_declarator_list
-	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	: struct_declarator {$$ = gen_structdecl_list(NULL, $1);}
+	| struct_declarator_list ',' struct_declarator {$$ = gen_structdecl_list($1, $3);}
 	;
 
 struct_declarator
-	: declarator
-	| ':' constant_expression
-	| declarator ':' constant_expression
+	: declarator {$$ = gen_structdecl($1, NULL);}
+	| ':' constant_expression {$$ = gen_structdecl(NULL, $2);}
+	| declarator ':' constant_expression {$$ = gen_structdecl($1, $3);}
 	;
 
 enum_specifier

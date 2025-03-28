@@ -28,6 +28,7 @@ public:
     std::string name;
     std::string val;
     // to string conversions done in constructor for ease of use and readability
+    Term(): name(""), val("") {}
     Term(const char *name, const char *val);
     Term(const char *name, const char *val, unsigned int line, unsigned int colno);
     void to_dot() override;
@@ -40,6 +41,7 @@ public:
     std::vector<AstNode *> children;
 
     NonTerm(const char *name);
+    NonTerm(): name("") {}
     void add_children(unsigned int count, ...);
     void to_dot() override;
 };

@@ -6,14 +6,14 @@ class ConstExpr;
 
 class Stmt: public NonTerm {
     public:  
-    Stmt() : NonTerm("") {};
+    Stmt() {};
     virtual ~Stmt() {};
 };
 
 class StmtList: public NonTerm {
     public:
     std::vector<Stmt*> stmts;
-    StmtList(): NonTerm("") {}
+    StmtList() {}
 };
 StmtList* gen_stmtlist(StmtList* sl, Stmt* s);
 
