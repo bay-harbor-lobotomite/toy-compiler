@@ -30,7 +30,8 @@ void NonTerm::add_children(unsigned int count, ...) {
     va_list list; 
     va_start(list, count); 
     for (unsigned int i = 0; i < count; i++) { 
-        children.push_back(va_arg(list, AstNode*));
+		auto ptr = va_arg(list, AstNode*);
+		if(ptr) children.push_back(ptr);
     } 
     va_end(list); 
 }

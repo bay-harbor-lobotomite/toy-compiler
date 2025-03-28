@@ -1,1 +1,3 @@
-int a = 9;
+int main() {
+    return 0;
+}

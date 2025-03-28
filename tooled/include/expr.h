@@ -19,10 +19,10 @@ ArgExprList *gen_argexprlist(ArgExprList *l, Expr *arg);
 
 enum PrExprType
 {
-    EXPRESSION_G,
-    IDENTIFIER_G,
-    CONSTANT_G,
-    STRING_LITERAL_G
+    PRT_EXPRESSION,
+    PRT_IDENTIFIER,
+    PRT_CONSTANT,
+    PRT_STRING_LITERAL
 };
 
 class PrExpr : public Expr
@@ -36,7 +36,7 @@ public:
         StrLit *string_lit;
         Expr *expr;
     } val;
-    PrExpr() : expr_type(EXPRESSION_G) {}
+    PrExpr() : expr_type(PRT_EXPRESSION) {}
 };
 
 PrExpr *gen_prexpr_idfr(Idfr *i);

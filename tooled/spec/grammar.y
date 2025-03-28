@@ -494,10 +494,10 @@ statement
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement 
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
-	;
+	: IDENTIFIER ':' statement {$$ = gen_labstmt($1, $3);}
+	| CASE constant_expression ':' statement {$$ = gen_labstmt_case($2, $4);}
+	| DEFAULT ':' statement {$$ = gen_labstmt_case(NULL, $3);}
+	; 
 
 compound_statement
 	: '{' '}' {$$ = gen_compstmt(NULL, NULL);}
@@ -512,34 +512,34 @@ declaration_list
 	;
 
 statement_list
-	: statement {$$ = gen_stmtlist(NULL, $1);}
+	: statement { $$ = gen_stmtlist(NULL, $1);}
 	| statement_list statement {$$ = gen_stmtlist($1, $2);}
 	;
 
 expression_statement
-	: ';'
-	| expression ';'
+	: ';' {$$ = gen_exprstmt(NULL);}
+	| expression ';' {$$ = gen_exprstmt($1);}
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
-	| SWITCH '(' expression ')' statement
+	: IF '(' expression ')' statement {$$ = gen_selstmt_if($3, $5, NULL);}
+	| IF '(' expression ')' statement ELSE statement {$$ = gen_selstmt_if($3, $5, $7);}
+	| SWITCH '(' expression ')' statement {$$ = gen_selstmt_switch($3, $5);}
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
+	: WHILE '(' expression ')' statement {$$ = gen_itrstmt_while(ISK_WHILE, $3, $5);}
+	| DO statement WHILE '(' expression ')' ';' {$$ = gen_itrstmt_while(ISK_DOWHILE, $5, $2);}
+	| FOR '(' expression_statement expression_statement ')' statement {$$ = gen_itrstmt_for($3, $4, NULL, $6);}
+	| FOR '(' expression_statement expression_statement expression ')' statement {$$ = gen_itrstmt_for($3, $4, $5, $7);}
 	;
 
 jump_statement
-	: GOTO IDENTIFIER ';'
-	| CONTINUE ';'
-	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	: GOTO IDENTIFIER ';' {$$ = gen_jmpstmt_goto($2);}
+	| CONTINUE ';' {$$ = gen_jmpstmt(JSK_CONTINUE);}
+	| BREAK ';' {$$ = gen_jmpstmt(JSK_BREAK);}
+	| RETURN ';' {$$ = gen_jmpstmt(JSK_RETURN);}
+	| RETURN expression ';' {$$ = gen_jmpstmt_return($2);}
 	;
 
 translation_unit

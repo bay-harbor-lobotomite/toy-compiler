@@ -1,5 +1,5 @@
 #include <expr.h>
-#include <iostream>
+
 ArgExprList* gen_argexprlist(ArgExprList*l, Expr* arg){
     if(!l) l = new ArgExprList();
     l->args.push_back(arg);
@@ -11,7 +11,8 @@ ArgExprList* gen_argexprlist(ArgExprList*l, Expr* arg){
 PrExpr* gen_prexpr_idfr(Idfr* i) {
     auto p = new PrExpr();
     p->name = std::string("primary_expression_") + i->name;
-    p->expr_type = IDENTIFIER_G;
+    p->add_children(1, i);
+    p->expr_type = PRT_IDENTIFIER;
     //temp guard
     if(i)
     {
@@ -22,8 +23,9 @@ PrExpr* gen_prexpr_idfr(Idfr* i) {
 }
 PrExpr* gen_prexpr_cnst(Cnst* c) {
     auto p = new PrExpr();
-    p->name = std::string("primary_expression_") + c->name + std::string(c->val);
-    p->expr_type = CONSTANT_G;
+    p->name = std::string("primary_expression_") + c->name + std::string("_" + c->val);
+    p->add_children(1, c);
+    p->expr_type = PRT_CONSTANT;
     //temp guard
     if(c)
     {
@@ -35,7 +37,8 @@ PrExpr* gen_prexpr_cnst(Cnst* c) {
 PrExpr* gen_prexpr_strlit(StrLit* s) {
     auto p = new PrExpr();
     p->name = std::string("primary_expression_") + s->name;
-    p->expr_type = STRING_LITERAL_G;
+    p->add_children(1, s);
+    p->expr_type = PRT_STRING_LITERAL;
     //temp guard
     if(s)
     {

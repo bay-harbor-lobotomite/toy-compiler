@@ -2,6 +2,7 @@
 #include <cstdarg>
 #include <string>
 #include <vector>
+#include <iostream>
 // for token types
 //  Essentially modelling these as structs
 //  Class for AST node
