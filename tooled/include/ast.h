@@ -46,7 +46,10 @@ public:
 // some basics
 class Idfr : public Term
 {
+public:
+    Idfr() : Term("identifier", "") {}
 };
+Idfr *gen_idfr(const char *val);
 
 union cnst_val
 {
@@ -63,9 +66,12 @@ class Cnst : public Term
 {
 public:
     // todo: semantic check - CHANGE CONSTRUCTOR
+    Cnst(const char* name, const char* val): Term(name, val) {}
     Cnst(const char *name, const char *val, unsigned int line, unsigned int colno) : Term(name, val, line, colno) {};
-    union cnst_val val;
+    union cnst_val cval;
 };
+//will incorporate constant type during semantic analysis
+Cnst* gen_cnst(const char* name, const char* val);
 
 class StrLit : public Term
 {

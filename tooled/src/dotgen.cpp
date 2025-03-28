@@ -7,6 +7,8 @@
 #include <ast.h>
 #include <expr.h>
 #include <decl.h>
+#include <udtype.h>
+#include <stmt.h>
 #include "y.tab.h"
 
 extern FILE *yyin;

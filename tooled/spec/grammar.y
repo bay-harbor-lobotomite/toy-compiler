@@ -1,11 +1,13 @@
 %{
 	#include <expr.h>
 	#include <decl.h>
+	#include <udtype.h>
+	#include <stmt.h>
 	#include <ast.h>
 	#include <stdio.h>
 	int yylex();
 	void yyerror(const char* s);
-	extern AstNode* root;
+	extern NonTerm* root;
 	//type declarations
 %}
 
@@ -14,6 +16,7 @@
 %union{
 	AstNode * node;
 	Term * terminal;
+	NonTerm* non_terminal;
 	int value;
 	Cnst *constant;
 	StrLit *string_literal;
@@ -41,7 +44,7 @@
 	TypeQual* type_qualifier;
 	SpecQualList* specifier_qualifier_list;
 	StorageClassSpec* storage_class_specifier;
-	DeclSpecs* declaration_specifiers;
+	DeclnSpecs* declaration_specifiers;
 	InitDeclList* init_declarator_list;
 	InitDecl* init_declarator;
 	//masti
@@ -53,6 +56,23 @@
 	DirDecl* direct_declarator;
 	IdfrList* identifier_list;
 	InitializerList* initializer_list;
+	ParamDecln* parameter_declaration;
+	ParamList* parameter_list;
+	AbsDecl* abstract_declarator;
+	DirAbsDecl* direct_abstract_declarator;
+	DeclnList* declaration_list;
+	Enumtr* enumerator;
+	EnumtrList* enumerator_list;
+	EnumSpec* enum_specifier;
+	Stmt* statement;
+	StmtList* statement_list;
+	ItrStmt* iteration_statement;
+	JmpStmt* jump_statement;
+	SelStmt* selection_statement;
+	CompStmt* compound_statement;
+	LabStmt* labeled_statement;
+	ExprStmt* expression_statement;
+	FuncDef* function_definition;
 }
 
 %token <terminal> '.' 
@@ -114,6 +134,24 @@
 %type <direct_declarator> direct_declarator
 %type <identifier_list> identifier_list
 %type <initializer_list> initializer_list
+%type <parameter_declaration> parameter_declaration
+%type <parameter_list> parameter_list
+%type <direct_abstract_declarator> direct_abstract_declarator
+%type <abstract_declarator> abstract_declarator
+%type <declaration_list> declaration_list
+%type <enumerator> enumerator
+%type <enumerator_list> enumerator_list
+%type <enum_specifier> enum_specifier
+%type <statement> statement
+%type <statement_list> statement_list
+%type <statement> compound_statement
+%type <statement> jump_statement
+%type <statement> labeled_statement
+%type <statement> iteration_statement
+%type <statement> selection_statement
+%type <statement> expression_statement
+%type <non_terminal> external_declaration
+%type <function_definition> function_definition
 
 %start translation_unit
 %%
@@ -262,12 +300,12 @@ declaration
 	;
 
 declaration_specifiers
-	: storage_class_specifier {$$ = gen_declspecs(NULL, NULL, NULL, $1);}
-	| storage_class_specifier declaration_specifiers {$$ = gen_declspecs($2, NULL, NULL, $1);}
-	| type_specifier {$$ = gen_declspecs(NULL, $1, NULL, NULL);}
-	| type_specifier declaration_specifiers {$$ = gen_declspecs($2, $1, NULL, NULL);}
-	| type_qualifier {$$ = gen_declspecs(NULL, NULL, $1, NULL);}
-	| type_qualifier declaration_specifiers {$$ = gen_declspecs($2, NULL, $1, NULL);}
+	: storage_class_specifier {$$ = gen_declnspecs(NULL, NULL, NULL, $1);}
+	| storage_class_specifier declaration_specifiers {$$ = gen_declnspecs($2, NULL, NULL, $1);}
+	| type_specifier {$$ = gen_declnspecs(NULL, $1, NULL, NULL);}
+	| type_specifier declaration_specifiers {$$ = gen_declnspecs($2, $1, NULL, NULL);}
+	| type_qualifier {$$ = gen_declnspecs(NULL, NULL, $1, NULL);}
+	| type_qualifier declaration_specifiers {$$ = gen_declnspecs($2, NULL, $1, NULL);}
 	;
 
 init_declarator_list
@@ -298,7 +336,7 @@ type_specifier
 	| DOUBLE {$$ = $1;}
 	| SIGNED {$$ = $1;}
 	| UNSIGNED {$$ = $1;}
-	| struct_or_union_specifier
+	| struct_or_union_specifier 
 	| enum_specifier
 	| TYPE_NAME 
 	;
@@ -342,19 +380,19 @@ struct_declarator
 	;
 
 enum_specifier
-	: ENUM '{' enumerator_list '}'
-	| ENUM IDENTIFIER '{' enumerator_list '}'
-	| ENUM IDENTIFIER
+	: ENUM '{' enumerator_list '}' {$$ = gen_enumspec(NULL, $3);}
+	| ENUM IDENTIFIER '{' enumerator_list '}' {$$ = gen_enumspec($2, $4);}
+	| ENUM IDENTIFIER {$$ = gen_enumspec($2, NULL);}
 	;
 
 enumerator_list
-	: enumerator
-	| enumerator_list ',' enumerator
+	: enumerator {$$ = gen_enumtrlist(NULL, $1);}
+	| enumerator_list ',' enumerator {$$ = gen_enumtrlist($1, $3);}
 	;
 
 enumerator
-	: IDENTIFIER
-	| IDENTIFIER '=' constant_expression
+	: IDENTIFIER {$$ = gen_enumtr($1, NULL);}
+	| IDENTIFIER '=' constant_expression {$$ = gen_enumtr($1, $3);}
 	;
 
 type_qualifier
@@ -368,13 +406,13 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER
-	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	: IDENTIFIER {$$ = gen_dirdecl_idfr($1);}
+	| '(' declarator ')' {$$ = gen_dirdecl_decl($2);}
+	| direct_declarator '[' constant_expression ']' {$$ = gen_dirdecl_arr($1, $3);}
+	| direct_declarator '[' ']' {$$ = gen_dirdecl_arr($1, NULL);}
+	| direct_declarator '(' parameter_list ')' {$$ = gen_dirdecl_func($1, $3, NULL);}
+	| direct_declarator '(' identifier_list ')' {$$ = gen_dirdecl_func($1, NULL, $3);}
+	| direct_declarator '(' ')' {$$ = gen_dirdecl_func($1, NULL, NULL);}
 	;
 
 pointer
@@ -397,14 +435,14 @@ type_qualifier_list
 // 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	: parameter_declaration {$$ = gen_paramlist(NULL, $1);}
+	| parameter_list ',' parameter_declaration {$$ = gen_paramlist($1, $3);}
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
-	| declaration_specifiers abstract_declarator 
-	| declaration_specifiers
+	: declaration_specifiers declarator {$$ = gen_paramdecln($1, NULL, $2);}
+	| declaration_specifiers abstract_declarator {$$ = gen_paramdecln($1, $2, NULL);}
+	| declaration_specifiers {$$ = gen_paramdecln($1, NULL, NULL);}
 	;
 
 identifier_list
@@ -413,26 +451,26 @@ identifier_list
 	; 
 
 type_name
-	: specifier_qualifier_list
+	: specifier_qualifier_list 
 	| specifier_qualifier_list abstract_declarator
 	;
 
 abstract_declarator
-	: pointer
-	| direct_abstract_declarator
-	| pointer direct_abstract_declarator
+	: pointer {$$ = gen_absdecl(NULL, $1);}
+	| direct_abstract_declarator {$$ = gen_absdecl($1, NULL);}
+	| pointer direct_abstract_declarator {$$ = gen_absdecl($2, $1);}
 	;
 
 direct_abstract_declarator
-	: '(' abstract_declarator ')'
-	| '[' ']'
-	| '[' constant_expression ']'
-	| direct_abstract_declarator '[' ']'
-	| direct_abstract_declarator '[' constant_expression ']'
-	| '(' ')'
-	| '(' parameter_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_list ')'
+	: '(' abstract_declarator ')' {$$ = gen_dirabsdecl_decl($2);}
+	| '[' ']' {$$ = gen_dirabsdecl_arr(NULL, NULL);}
+	| '[' constant_expression ']' {$$ = gen_dirabsdecl_arr(NULL, $2);}
+	| direct_abstract_declarator '[' ']' {$$ = gen_dirabsdecl_arr($1, NULL);}
+	| direct_abstract_declarator '[' constant_expression ']' {$$ = gen_dirabsdecl_arr($1, $3);}
+	| '(' ')' {$$ = gen_dirabsdecl_func(NULL, NULL);}
+	| '(' parameter_list ')' {$$ = gen_dirabsdecl_func(NULL, $2);}
+	| direct_abstract_declarator '(' ')' {$$ = gen_dirabsdecl_func($1, NULL);}
+	| direct_abstract_declarator '(' parameter_list ')' {$$ = gen_dirabsdecl_func($1, $3);}
 	;
 
 initializer
@@ -447,35 +485,35 @@ initializer_list
 	;
 
 statement
-	: labeled_statement
-	| compound_statement
-	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	: labeled_statement {$$ = $1;} 
+	| compound_statement {$$ = $1;}
+	| expression_statement {$$ = $1;}
+	| selection_statement {$$ = $1;}
+	| iteration_statement {$$ = $1;}
+	| jump_statement {$$ = $1;}
 	;
 
 labeled_statement
-	: IDENTIFIER ':' statement
+	: IDENTIFIER ':' statement 
 	| CASE constant_expression ':' statement
 	| DEFAULT ':' statement
 	;
 
 compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+	: '{' '}' {$$ = gen_compstmt(NULL, NULL);}
+	| '{' statement_list '}' {$$ = gen_compstmt(NULL, $2);}
+	| '{' declaration_list '}' {$$ = gen_compstmt($2, NULL);}
+	| '{' declaration_list statement_list '}' {$$ = gen_compstmt($2, $3);}
 	;
 
 declaration_list
-	: declaration
-	| declaration_list declaration
+	: declaration {$$ = gen_declnlist(NULL, $1);}
+	| declaration_list declaration {$$ = gen_declnlist($1, $2);}
 	;
 
 statement_list
-	: statement
-	| statement_list statement
+	: statement {$$ = gen_stmtlist(NULL, $1);}
+	| statement_list statement {$$ = gen_stmtlist($1, $2);}
 	;
 
 expression_statement
@@ -505,24 +543,27 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration
-	| translation_unit external_declaration
+	: external_declaration {root->add_children(1, $1);}
+	| translation_unit external_declaration {root->add_children(1, $2);}
 	;
 
 external_declaration
-	: function_definition
-	| declaration
+	: function_definition {$$ = $1;}
+	| declaration {$$ = $1;}
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
-	| declarator declaration_list compound_statement
-	| declarator compound_statement
+	: declaration_specifiers declarator declaration_list compound_statement {$$ = gen_funcdef($1, $2, $3, $4);}
+	| declaration_specifiers declarator compound_statement {$$ = gen_funcdef($1, $2, NULL, $3);}
+	| declarator declaration_list compound_statement {$$ = gen_funcdef(NULL, $1, $2, $3);}
+	| declarator compound_statement {$$ = gen_funcdef(NULL, $1, NULL, $2);}
 	;
 
 %%
 #include <expr.h>
+#include <decl.h>
+#include <udtype.h>
+#include <stmt.h>
 #include <ast.h>
 #include <stdio.h>
 

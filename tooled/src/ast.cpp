@@ -60,3 +60,12 @@ void NonTerm::to_dot() {
 		}
 	}
 }
+
+Idfr* gen_idfr(const char* val) {
+	auto i = new Idfr();
+	i->val = val;
+	return i;
+}
+Cnst* gen_cnst(const char* name, const char* val) {
+	return new Cnst(name, val);
+}

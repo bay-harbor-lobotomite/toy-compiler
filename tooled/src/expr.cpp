@@ -1,4 +1,5 @@
 #include <expr.h>
+#include <iostream>
 ArgExprList* gen_argexprlist(ArgExprList*l, Expr* arg){
     if(!l) l = new ArgExprList();
     l->args.push_back(arg);
@@ -9,7 +10,7 @@ ArgExprList* gen_argexprlist(ArgExprList*l, Expr* arg){
 
 PrExpr* gen_prexpr_idfr(Idfr* i) {
     auto p = new PrExpr();
-    p->name = "primary_expression";
+    p->name = std::string("primary_expression_") + i->name;
     p->expr_type = IDENTIFIER_G;
     //temp guard
     if(i)
@@ -21,7 +22,7 @@ PrExpr* gen_prexpr_idfr(Idfr* i) {
 }
 PrExpr* gen_prexpr_cnst(Cnst* c) {
     auto p = new PrExpr();
-    p->name = "primary_expression";
+    p->name = std::string("primary_expression_") + c->name + std::string(c->val);
     p->expr_type = CONSTANT_G;
     //temp guard
     if(c)
@@ -33,7 +34,7 @@ PrExpr* gen_prexpr_cnst(Cnst* c) {
 }
 PrExpr* gen_prexpr_strlit(StrLit* s) {
     auto p = new PrExpr();
-    p->name = "primary_expression";
+    p->name = std::string("primary_expression_") + s->name;
     p->expr_type = STRING_LITERAL_G;
     //temp guard
     if(s)
@@ -79,7 +80,7 @@ PostfixExpr* gen_postfix_struni(Expr* e1, Term* op, Idfr* acc) {
     auto p = new PostfixExpr();
     p->e1 = dynamic_cast<PostfixExpr*>(e1);
     p->data.op = op;
-    p->name = op->name;
+    p->name = std::string("postfix_expression_") + op->name;
     p->add_children(3, e1, op, acc);
     p->line = e1->line;
     p->colno = e1->colno;
@@ -89,7 +90,7 @@ PostfixExpr* gen_postfix_idop(Expr* e1, Term* op) {
     auto p = new PostfixExpr();
     p->e1 = dynamic_cast<PostfixExpr*>(e1);
     p->data.op = op;
-    p->name = op->name;
+    p->name = std::string("postfix_expression_") + op->name;
     p->add_children(2, e1, op);
     p->line = e1->line;
     p->colno = e1->colno;
@@ -100,7 +101,7 @@ UnaryExpr *gen_unary_expr(Term* op, Expr *e) {
     auto u = new UnaryExpr();
     u->e = dynamic_cast<UnaryExpr*>(e);
     u->op = op;
-    u->name = op->name;
+    u->name = std::string("unary_expression_") + op->name;
     u->line = e->line;
     u->colno = e->colno;
     u->add_children(2, op, e);
@@ -123,7 +124,7 @@ BinaryExpr* gen_binary_expr(Expr*e1, Term* op, Expr* e2, const char* opname) {
     e->e2 = dynamic_cast<BinaryExpr*>(e2);
     e->op = op;
     //call semantic pass here for specific binary expression
-    e->name = std::string(opname);
+    e->name = std::string("binary_expression_") + std::string(opname);
     e->line = e1->line;
     e->colno = e1->colno;
     e->add_children(3, e1, e2, op);
@@ -149,7 +150,7 @@ AssignExpr* gen_assign_expr(Expr*e1, Term*op, Expr*e2) {
     e->e1 = e1;
     e->e2 = e2;
     e->op = op;
-    e->name = op->name;
+    e->name = std::string("assignment_expression_") + op->name;
     e->add_children(3, e1, op, e2);
     e->line = e1->line;
     e->colno = e1->colno;

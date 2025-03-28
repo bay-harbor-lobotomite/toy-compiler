@@ -14,9 +14,15 @@ LEXSPEC=$(SPEC_DIR)/lexspec.l
 INCFLAGS = $(addprefix -I, $(INC_DIR))
 LDFLAgs=-lfl
 
-OBJS=$(OBJ_DIR)/expr.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/symtable.o $(OBJ_DIR)/parser.o $(OBJ_DIR)/decl.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/dotgen.o
+OBJS=$(OBJ_DIR)/parser.o $(OBJ_DIR)/udtype.o $(OBJ_DIR)/stmt.o $(OBJ_DIR)/expr.o $(OBJ_DIR)/decl.o $(OBJ_DIR)/ast.o $(OBJ_DIR)/symtable.o $(OBJ_DIR)/lexer.o $(OBJ_DIR)/dotgen.o
 
 all: compiler
+
+$(OBJ_DIR)/udtype.o: $(SRC_DIR)/udtype.cpp
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/udtype.cpp -o $(OBJ_DIR)/udtype.o
+
+$(OBJ_DIR)/stmt.o: $(SRC_DIR)/stmt.cpp
+	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/stmt.cpp -o $(OBJ_DIR)/stmt.o
 
 $(OBJ_DIR)/decl.o: $(SRC_DIR)/decl.cpp
 	$(CXX) -c $(INCFLAGS) $(LDFLAGS) $(SRC_DIR)/decl.cpp -o $(OBJ_DIR)/decl.o

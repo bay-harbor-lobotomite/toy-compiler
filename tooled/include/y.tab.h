@@ -120,10 +120,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 14 "spec/grammar.y"
+#line 16 "spec/grammar.y"
 
 	AstNode * node;
 	Term * terminal;
+	NonTerm* non_terminal;
 	int value;
 	Cnst *constant;
 	StrLit *string_literal;
@@ -151,7 +152,7 @@ union YYSTYPE
 	TypeQual* type_qualifier;
 	SpecQualList* specifier_qualifier_list;
 	StorageClassSpec* storage_class_specifier;
-	DeclSpecs* declaration_specifiers;
+	DeclnSpecs* declaration_specifiers;
 	InitDeclList* init_declarator_list;
 	InitDecl* init_declarator;
 	//masti
@@ -163,8 +164,25 @@ union YYSTYPE
 	DirDecl* direct_declarator;
 	IdfrList* identifier_list;
 	InitializerList* initializer_list;
+	ParamDecln* parameter_declaration;
+	ParamList* parameter_list;
+	AbsDecl* abstract_declarator;
+	DirAbsDecl* direct_abstract_declarator;
+	DeclnList* declaration_list;
+	Enumtr* enumerator;
+	EnumtrList* enumerator_list;
+	EnumSpec* enum_specifier;
+	Stmt* statement;
+	StmtList* statement_list;
+	ItrStmt* iteration_statement;
+	JmpStmt* jump_statement;
+	SelStmt* selection_statement;
+	CompStmt* compound_statement;
+	LabStmt* labeled_statement;
+	ExprStmt* expression_statement;
+	FuncDef* function_definition;
 
-#line 168 "include/y.tab.h"
+#line 186 "include/y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
